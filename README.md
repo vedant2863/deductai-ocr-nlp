@@ -27,7 +27,7 @@ DeductAI is a smart, privacy-focused application designed to simplify expense tr
 flowchart TD
     UI["User Uploads Receipt Image<br/>(Streamlit)"]
     UI -- "sends request" --> Flask["Flask Backend<br/>/classify endpoint"]
-    Flask -- "saves temp image" --> OCR["OCR Module<br/>(Tesseract + OpenCV)"]
+    Flask -- "saves temp image" --> OCR["OCR Module<br/>(easyocr + OpenCV)"]
     OCR -- "Extracted Text" --> NLP["NLP Classification<br/>(LangChain + Ollama/Llama.cpp)"]
     NLP -- "Category + Text" --> Flask
     Flask -- "JSON response" --> UI

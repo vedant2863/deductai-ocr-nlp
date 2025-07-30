@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  # Main Flask application
+  deductai-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+    volumes:
+      # Mount source code for development (comment out for production)
+      - ./src:/app/src
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - deductai-network
+    depends_on:
+      - ollama
+
+  # Streamlit UI - Web interface
+  deductai-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.streamlit
+    ports:
+      - "8501:8501"
+    environment:
+      - STREAMLIT_SERVER_PORT=8501
+      - STREAMLIT_SERVER_ADDRESS=0.0.0.0
+      - BACKEND_URL=http://deductai-api:5000
+    volumes:
+      # Mount source code for development (comment out for production)
+      - ./src:/app/src
+    depends_on:
+      - deductai-api
+    restart: unless-stopped
+    networks:
+      - deductai-network
+
+  # Ollama service for local LLM
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+    networks:
+      - deductai-network
+    # Uncomment the following if you have an NVIDIA GPU
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+  # Ollama model setup (automatically pulls required models)
+  ollama-setup:
+    image: ollama/ollama:latest
+    depends_on:
+      - ollama
+    networks:
+      - deductai-network
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    command: >
+      sh -c "
+        echo 'Waiting for Ollama service to be ready...' &&
+        sleep 15 &&
+        echo 'Pulling llama3 model...' &&
+        ollama pull llama3 &&
+        echo 'Model llama3 pulled successfully' &&
+        echo 'Setup complete!'
+      "
+    restart: "no"
+
+volumes:
+  ollama_data:
+
+networks:
+  deductai-network:
+    driver: bridge

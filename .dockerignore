@@ -1,0 +1,30 @@
+# Git files
+.git
+.gitignore
+
+# Python virtual environment
+.venv
+
+# Docker files
+.dockerignore
+Dockerfile
+docker-compose.yml
+
+# IDE-specific files
+.idea
+.vscode
+
+# Python cache
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Build artifacts
+build/
+dist/
+*.egg-info
+*.egg
+
+# Tesseract installation guide
+TESSERACT_INSTALL.md

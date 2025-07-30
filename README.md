@@ -28,7 +28,8 @@ flowchart TD
     UI["User Uploads Receipt Image<br/>(Streamlit)"]
     UI -- "sends request" --> Flask["Flask Backend<br/>/classify endpoint"]
     Flask -- "saves temp image" --> OCR["OCR Module<br/>(easyocr + OpenCV)"]
-    OCR -- "Extracted Text" --> NLP["NLP Classification<br/>(LangChain + Ollama/Llama.cpp)"]
+    OCR -- "Extracted Text" --> Flask
+    Flask -- "sent to backend for classification" --> NLP["NLP Classification<br/>(LangChain + Ollama/Llama.cpp)"]
     NLP -- "Category + Text" --> Flask
     Flask -- "JSON response" --> UI
     UI -- "Display results to user" --> Result["Show Extracted Text + Predicted Category"]
